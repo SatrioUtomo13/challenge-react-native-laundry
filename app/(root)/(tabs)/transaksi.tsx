@@ -12,7 +12,7 @@ const transactions = [
 const transaksi = () => {
     return (
         <View className="bg-gray-100 flex-1">
-            <View className="bg-blue-500 p-4 rounded-b-3xl">
+            <View className="bg-blue-500 p-4 rounded-b-3xl mb-5">
                 <Text className="text-white text-xl font-bold">Riwayat Transaksi</Text>
                 <Text className="text-white">Gina Rodriguez</Text>
             </View>
@@ -21,13 +21,16 @@ const transaksi = () => {
                 {transactions.map((item, index) => (
                     <View
                         key={index}
-                        className="bg-white p-4 mb-3 rounded-lg shadow"
+                        className="bg-white px-4 py-6 m-3 rounded-lg shadow"
                     >
-                        <Text className="text-gray-800 font-semibold">{item.date}</Text>
-                        <Text className="text-red-500 text-sm">{item.type}</Text>
-                        <View className="flex-row justify-between mt-1">
-                            <Text className="text-gray-600 text-sm">{item.qty}</Text>
+                        <View className="flex flex-row justify-between">
+                            <Text className="text-gray-800 font-semibold">{item.date}</Text>
                             <Text className="text-blue-500 font-bold">{item.amount}</Text>
+                        </View>
+                        <View className="flex-row justify-between mt-1">
+                            <Text className="text-red-500 text-sm">{item.type}</Text>
+                            <Text className="text-gray-600 text-sm">{item.qty}</Text>
+
                         </View>
                     </View>
                 ))}
