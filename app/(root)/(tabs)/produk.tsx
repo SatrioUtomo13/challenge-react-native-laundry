@@ -1,5 +1,6 @@
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import React from 'react'
+import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput } from 'react-native';
+import { SelectList } from "react-native-dropdown-select-list";
+import React, { useState } from 'react'
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const customers = [
@@ -10,16 +11,99 @@ const customers = [
     { id: '5', name: 'Ana Rodriguez', phone: '0811083630', transactions: 1, initials: 'AR', color: 'bg-yellow-500' },
 ];
 
+const validCustomers = [
+    { key: "1", value: "Gina Maryani" },
+    { key: "2", value: "Gina Alchiferi" },
+];
+
+const packages = [
+    { key: "1", value: "Paket Reguler" },
+    { key: "2", value: "Paket Express" },
+];
+
 const produk = () => {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [customer, setCustomer] = useState("");
+    const [packageType, SetPackageType] = useState("")
+    const [quantity, setQuantity] = useState(0);
+    const [price, setPrice] = useState(0);
+
     return (
         <View className='flex-1 bg-gray-100 p-4'>
+            {/* Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setModalVisible(!modalVisible);
+                }}>
+                <View className='flex-1 bg-black/50 justify-end'>
+                    {/* Modal Content */}
+                    <View className='bg-white w-full h-[80%] rounded-t-3xl p-5'>
+                        <Text className='text-lg font-semibold mb-2'>Tambah Transaksi Baru</Text>
+
+                        <View className='mb-5'>
+                            <Text className='text-gray-600'>Nama Pelanggan</Text>
+                            <SelectList
+                                setSelected={setCustomer}
+                                data={validCustomers}
+                                placeholder='Pilih Pelanggan'
+                            />
+                        </View>
+
+                        <View className='mb-5'>
+                            <Text>Pilih Paket Laundry</Text>
+                            <SelectList
+                                setSelected={SetPackageType}
+                                data={packages}
+                                placeholder='Pilih Paket'
+                            />
+                        </View>
+
+                        <View className='mb-5'>
+                            <Text>Kuantitas (Kg)</Text>
+                            <TextInput
+                                className='border rounded-lg p-2 bg-white'
+                                placeholder='Masukkan berapa kilogram'
+                                keyboardType='numeric'
+                                value={quantity.toString()}
+                                onChangeText={(text) => setQuantity(parseInt(text))}
+                            />
+                        </View>
+
+                        <View className='mb-5'>
+                            <Text className='text-gray-600'>Total Biaya</Text>
+                            <View className='border rounded-lg p-2 bg-gray-200 mb-4'>
+                                <Text>Rp {price}</Text>
+                            </View>
+                        </View>
+
+                        <TouchableOpacity className='bg-blue-500 p-3 rounded-lg'>
+                            <Text className='text-white text-center font-semibold'>SUBMIT</Text>
+                        </TouchableOpacity>
+
+                        <Pressable
+                            className='absolute top-5 right-5'
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <AntDesign name="closecircleo" size={24} color="black" />
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+
             <View className='flex flex-row items-center justify-between'>
                 <View>
                     <Text className='text-blue-700 text-xl font-bold mb-2'>Daftar Transaksi</Text>
                     <Text className='text-gray-600 mb-4'>Semua Pelanggan</Text>
                 </View>
                 <TouchableOpacity>
-                    <AntDesign name="pluscircle" size={45} color="blue" />
+                    <Pressable
+                        onPress={() => setModalVisible(true)}
+                    >
+                        <AntDesign name="pluscircle" size={45} color="blue" />
+                    </Pressable>
                 </TouchableOpacity>
             </View>
 
