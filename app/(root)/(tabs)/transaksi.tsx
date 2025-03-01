@@ -1,6 +1,9 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import { SelectList } from "react-native-dropdown-select-list";
 import React, { useState } from 'react'
+import ListData from '../../components/listData';
+import Header from '../../components/header';
+
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const customers = [
@@ -9,6 +12,7 @@ const customers = [
     { id: '3', name: 'Fahri Chen', phone: '0812637710', transactions: 1, initials: 'FC', color: 'bg-gray-500' },
     { id: '4', name: 'Gina Rodriguez', phone: '0812655652', transactions: 5, initials: 'GR', color: 'bg-green-500' },
     { id: '5', name: 'Ana Rodriguez', phone: '0811083630', transactions: 1, initials: 'AR', color: 'bg-yellow-500' },
+    { id: '6', name: 'Satrio', phone: '0811083630', transactions: 1, initials: 'AR', color: 'bg-yellow-500' },
 ];
 
 const validCustomers = [
@@ -94,40 +98,15 @@ const transaksi = () => {
                     </View>
                 </Modal>
 
-                <View className='flex flex-row items-center justify-between'>
-                    <View>
-                        <Text className='text-blue-700 text-xl font-bold mb-2'>Daftar Transaksi</Text>
-                        <Text className='text-gray-600 mb-4'>Semua Pelanggan</Text>
-                    </View>
-                    <TouchableOpacity>
-                        <Pressable
-                            onPress={() => setModalVisible(true)}
-                        >
-                            <AntDesign name="pluscircle" size={45} color="blue" />
-                        </Pressable>
-                    </TouchableOpacity>
-                </View>
-
-                <FlatList
-                    data={customers}
-                    renderItem={({ item }) => (
-                        <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
-                            <View className={`w-12 h-12 rounded-full flex items-center ${item.color} justify-center mr-3`}>
-                                <Text>{item.initials}</Text>
-                            </View>
-
-                            <View className='flex-1'>
-                                <Text className='font-semibold text-gray-900'>{item.name}</Text>
-                                <Text className='text-gray-600 text-sm'>{item.phone}</Text>
-                                <Text className='text-gray-500 text-xs'>{item.transactions} Transaksi</Text>
-                            </View>
-
-                            <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>
-                                <Text className='text-white text-sm font-semibold'>Lihat Transaksi</Text>
-                            </TouchableOpacity>
-                        </View>
-                    )}
+                <Header
+                    title='Transaksi'
+                    type='Pelanggan'
+                    setModalVisible={setModalVisible}
+                    icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
+
+                <ListData customers={customers} />
+
             </View>
         </SafeAreaView>
     )
