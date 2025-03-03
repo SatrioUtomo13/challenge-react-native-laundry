@@ -13,7 +13,6 @@ const header = ({ setModalVisible, icon, title, type }: { setModalVisible: (visi
                     onPress={() => setModalVisible(true)}
                 >
                     {icon && icon}
-                    {/* <AntDesign name="pluscircle" size={45} color="blue" /> */}
                 </Pressable>
             </TouchableOpacity>
         </View>

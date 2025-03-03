@@ -1,8 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import { SelectList } from "react-native-dropdown-select-list";
 import React, { useState } from 'react'
-import ListData from '../../components/listData';
-import Header from '../../components/header';
+import ListData from '../components/listData';
+import Header from '../components/header';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 
