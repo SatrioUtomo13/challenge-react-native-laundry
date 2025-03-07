@@ -1,8 +1,7 @@
-import { View, Text, TextInput, TouchableOpacity, Image, Button, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native'
 import React, { useState } from 'react'
 import { useRouter } from 'expo-router';
-import { axiosInstance } from '@/lib/axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { login } from '@/lib/axios';
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -11,30 +10,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 const LoginScreen = () => {
     const router = useRouter();
     const [form, setForm] = useState({ username: '', password: '' });
-
-
-    const login = async () => {
-
-        if (!form.username || !form.password) {
-            alert('Email dan password harus diisi');
-            return
-        }
-
-        try {
-            const response = await axiosInstance.post('/auth/login', form)
-
-            if (response.status == 201) {
-                const token = response.data.data.token
-                await AsyncStorage.setItem('token', token)
-                router.push('/customer');
-            } else {
-                alert('Login gagal')
-            }
-        } catch (error) {
-            console.error('Login error :', error)
-            alert('Terjadi Kesalahan')
-        }
-    }
 
     return (
         <View className='flex-1 items-center justify-center bg-white p-5'>
@@ -73,7 +48,7 @@ const LoginScreen = () => {
 
             <TouchableOpacity
                 className='text-lg font-bold bg-blue-500 py-3 w-full rounded-lg items-center mb-4'
-                onPress={login}
+                onPress={() => login(form, router)}
             >
                 <Text className='text-lg font-bold text-white'>Masuk</Text>
             </TouchableOpacity>

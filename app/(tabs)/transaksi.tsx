@@ -118,7 +118,6 @@ const transaksi = () => {
 
                 <Header
                     title='Transaksi'
-                    type='Pelanggan'
                     setModalVisible={setModalVisible}
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />

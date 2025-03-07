@@ -1,7 +1,7 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import React, { useState, useEffect } from 'react'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { axiosInstance } from '@/lib/axios'
+import { fetchProduk } from '@/lib/axios'
+import { getInitials } from '@/utils/textUtils';
 import Header from '../components/header';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -22,32 +22,13 @@ const produk = () => {
     const [addProductPrice, setAddProductPrice] = useState<string>('')
     const [addTypeProduct, setAddTypeProduct] = useState<string>('')
 
-    const fetchProduk = async () => {
-
-        const token = await AsyncStorage.getItem('token')
-
-        if (!token) {
-            console.error("Token tidak ditemukan")
-            return
-        }
-
-        try {
-            const response = await axiosInstance.get('products/', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-
-            setProducts(response.data.data)
-        } catch (error: any) {
-            console.log(error)
-        }
-    }
-
     useEffect(() => {
-        fetchProduk()
+        const getProducts = async () => {
+            const data = await fetchProduk() // Panggil fungsi fetchProduk
+            setProducts(data)
+        }
+
+        getProducts()
     }, [])
 
     return (
@@ -112,8 +93,7 @@ const produk = () => {
                 </Modal>
 
                 <Header
-                    title='Customer'
-                    type='Customer'
+                    title='Produk'
                     setModalVisible={setModalVisible}
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
@@ -123,7 +103,7 @@ const produk = () => {
                     renderItem={({ item }) => (
                         <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
                             <View className={`w-12 h-12 rounded-full flex items-center bg-green-300 justify-center mr-3`}>
-                                <Text>SU</Text>
+                                <Text>{getInitials(item.name)}</Text>
                             </View>
 
                             <View className='flex-1'>

@@ -114,7 +114,6 @@ const customer = () => {
 
                 <Header
                     title='Customer'
-                    type='Customer'
                     setModalVisible={setModalVisible}
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
