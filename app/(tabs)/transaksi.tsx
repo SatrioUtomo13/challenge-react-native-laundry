@@ -1,10 +1,12 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import { SelectList } from "react-native-dropdown-select-list";
 import React, { useState } from 'react'
+import { axiosInstance } from '@/lib/axios';
 import ListData from '../components/listData';
 import Header from '../components/header';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const customers = [
     { id: '1', name: 'Gina Maryani', phone: '0811832614', transactions: 4, initials: 'GM', color: 'bg-purple-700' },
@@ -31,6 +33,22 @@ const transaksi = () => {
     const [packageType, SetPackageType] = useState("")
     const [quantity, setQuantity] = useState(0);
     const [price, setPrice] = useState(0);
+
+    // const fetchTransaksi = async () => {
+
+    //     const token = AsyncStorage.getItem('token');
+
+    //     if (!token) {
+    //         console.error("Token tidak ditemukan")
+    //         return
+    //     }
+
+    //     try {
+    //         const response = await axiosInstance.get()
+    //     } catch (error) {
+
+    //     }
+    // }
 
     return (
         <SafeAreaView className='flex-1'>
@@ -105,7 +123,28 @@ const transaksi = () => {
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
 
-                <ListData customers={customers} />
+                {/* <ListData customers={customers} /> */}
+
+                <FlatList
+                    data={customers}
+                    renderItem={({ item }) => (
+                        <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
+                            <View className={`w-12 h-12 rounded-full flex items-center ${item.color} justify-center mr-3`}>
+                                <Text>{item.initials}</Text>
+                            </View>
+
+                            <View className='flex-1'>
+                                <Text className='font-semibold text-gray-900'>{item.name}</Text>
+                                <Text className='text-gray-600 text-sm'>{item.phone}</Text>
+                                <Text className='text-gray-500 text-xs'>{item.transactions} Transaksi</Text>
+                            </View>
+
+                            <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>
+                                <Text className='text-white text-sm font-semibold'>Lihat Transaksi</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
 
             </View>
         </SafeAreaView>

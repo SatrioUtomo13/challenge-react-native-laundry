@@ -31,7 +31,7 @@ const customer = () => {
         }
 
         try {
-            const response = await axiosInstance.get('/customers', {
+            const response = await axiosInstance.get('/customers/', {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json',
