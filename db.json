@@ -1,0 +1,25 @@
+{ 
+    "status": {
+    "code": 200,
+    "description": "Ok"
+},
+    "data": [
+        {
+            "id": "cbead6e9-2a17-4d39-812c-c8a36923a89d",
+            "name": "Yanto Subidi",
+            "phoneNumber": "828292992",
+            "address": "Jakarta Selatan",
+            "createdAt": "2025-03-05T21:24:42.1540973+07:00",
+            "updatedAt": "2025-03-05T21:24:42.1540973+07:00"
+        },
+        {
+            "id": "b32eed7d-052a-4711-bcad-0bc577654883",
+            "name": "Ana Maryani",
+            "phoneNumber": "7398291200",
+            "address": "Jakarta Barat",
+            "createdAt": "2025-03-05T21:24:42.1540973+07:00",
+            "updatedAt": "2025-03-05T21:24:42.1540973+07:00"
+        }
+    ],
+    "paging": null
+}

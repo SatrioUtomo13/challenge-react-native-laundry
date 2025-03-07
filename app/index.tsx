@@ -13,6 +13,7 @@ export default function Index() {
       <Link href="/login">Login</Link>
       <Link href="/produk">Produk</Link>
       <Link href="/transaksi">Transaksi</Link>
+      <Link href="/customer">Customer</Link>
     </View>
   );
 }

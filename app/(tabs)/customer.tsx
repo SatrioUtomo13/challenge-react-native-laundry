@@ -1,42 +1,59 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
-import { SelectList } from "react-native-dropdown-select-list";
-import React, { useState } from 'react'
-
-import ListData from '../components/listData';
+import React, { useEffect, useState } from 'react'
+import { axiosInstance } from '../../lib/axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/header';
-
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-const customers = [
-    { id: '1', name: 'Gina Maryani', phone: '0811832614', transactions: 4, initials: 'GM', color: 'bg-purple-700' },
-    { id: '2', name: 'Gina Alghifari', phone: '0813913253', transactions: 3, initials: 'GA', color: 'bg-pink-500' },
-    { id: '3', name: 'Fahri Chen', phone: '0812637710', transactions: 1, initials: 'FC', color: 'bg-gray-500' },
-    { id: '4', name: 'Gina Rodriguez', phone: '0812655652', transactions: 5, initials: 'GR', color: 'bg-green-500' },
-    { id: '5', name: 'Ana Rodriguez', phone: '0811083630', transactions: 1, initials: 'AR', color: 'bg-yellow-500' },
-    { id: '6', name: 'Satrio', phone: '0811083630', transactions: 1, initials: 'AR', color: 'bg-yellow-500' },
-];
-
-const validCustomers = [
-    { key: "1", value: "Gina Maryani" },
-    { key: "2", value: "Gina Alchiferi" },
-];
-
-const packages = [
-    { key: "1", value: "Paket Reguler" },
-    { key: "2", value: "Paket Express" },
-];
+interface Customer {
+    id: string;
+    name: string;
+    phoneNumber: string;
+    address: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
 const customer = () => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [customer, setCustomer] = useState("");
-    const [packageType, SetPackageType] = useState("")
-    const [quantity, setQuantity] = useState(0);
-    const [price, setPrice] = useState(0);
+    const [customers, setCustomers] = useState<Customer[]>([])
+    const [addCustomer, setAddCustomer] = useState<string>('');
+    const [addPhoneNumber, setAddPhoneNumber] = useState<string>('');
+    const [addAddress, setAddAddress] = useState<string>('');
+
+    const fetchCustomer = async () => {
+
+        const token = await AsyncStorage.getItem('token');
+
+        if (!token) {
+            console.error("Token tidak ditemukan");
+            return;
+        }
+
+        try {
+            const response = await axiosInstance.get('/customers', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            setCustomers(response.data.data);
+        } catch (error: any) {
+            console.log(error)
+        }
+    };
+
+
+
+    useEffect(() => {
+        fetchCustomer();
+    }, []);
+
 
     return (
         <SafeAreaView className='flex-1'>
             <View className='flex-1 bg-gray-100 p-4'>
-                {/* Modal */}
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -46,44 +63,40 @@ const customer = () => {
                         setModalVisible(!modalVisible);
                     }}>
                     <View className='flex-1 bg-black/50 justify-end'>
-                        {/* Modal Content */}
                         <View className='bg-white w-full h-[80%] rounded-t-3xl p-5'>
-                            <Text className='text-lg font-semibold mb-2'>Tambah Transaksi Baru</Text>
+                            <Text className='text-lg font-semibold mb-2'>Tambah Customer Baru</Text>
 
                             <View className='mb-5'>
-                                <Text className='text-gray-600'>Nama Pelanggan</Text>
-                                <SelectList
-                                    setSelected={setCustomer}
-                                    data={validCustomers}
-                                    placeholder='Pilih Pelanggan'
-                                />
-                            </View>
-
-                            <View className='mb-5'>
-                                <Text>Pilih Paket Laundry</Text>
-                                <SelectList
-                                    setSelected={SetPackageType}
-                                    data={packages}
-                                    placeholder='Pilih Paket'
-                                />
-                            </View>
-
-                            <View className='mb-5'>
-                                <Text>Kuantitas (Kg)</Text>
+                                <Text>Nama Customer</Text>
                                 <TextInput
                                     className='border rounded-lg p-2 bg-white'
-                                    placeholder='Masukkan berapa kilogram'
-                                    keyboardType='numeric'
-                                    value={quantity.toString()}
-                                    onChangeText={(text) => setQuantity(parseInt(text))}
+                                    placeholder='Masukkan Nama Customer'
+                                    keyboardType='default'
+                                    value={addCustomer}
+                                    onChangeText={(text) => setAddCustomer(text)}
                                 />
                             </View>
 
                             <View className='mb-5'>
-                                <Text className='text-gray-600'>Total Biaya</Text>
-                                <View className='border rounded-lg p-2 bg-gray-200 mb-4'>
-                                    <Text>Rp {price}</Text>
-                                </View>
+                                <Text>Phone Number</Text>
+                                <TextInput
+                                    className='border rounded-lg p-2 bg-white'
+                                    placeholder='Masukkan Nomor HP Customer'
+                                    keyboardType='default'
+                                    value={addPhoneNumber}
+                                    onChangeText={(text) => setAddPhoneNumber(text)}
+                                />
+                            </View>
+
+                            <View className='mb-5'>
+                                <Text>Address</Text>
+                                <TextInput
+                                    className='border rounded-lg p-2 bg-white'
+                                    placeholder='Masukkan Alamat Customer'
+                                    keyboardType='default'
+                                    value={addAddress}
+                                    onChangeText={(text) => setAddAddress(text)}
+                                />
                             </View>
 
                             <TouchableOpacity className='bg-blue-500 p-3 rounded-lg'>
@@ -106,7 +119,26 @@ const customer = () => {
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
 
-                <ListData customers={customers} />
+                <FlatList
+                    data={customers}
+                    renderItem={({ item }) => (
+                        <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
+                            <View className={`w-12 h-12 rounded-full flex items-center bg-green-300 justify-center mr-3`}>
+                                <Text>SU</Text>
+                            </View>
+
+                            <View className='flex-1'>
+                                <Text className='font-semibold text-gray-900'>{item.name}</Text>
+                                <Text className='text-gray-600 text-sm'>{item.phoneNumber}</Text>
+                                <Text className='text-gray-500 text-xs'>{item.address}</Text>
+                            </View>
+
+                            <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>
+                                <Text className='text-white text-sm font-semibold'>Lihat Customer</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
 
             </View>
         </SafeAreaView>

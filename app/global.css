@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.input-login {
+  @apply flex-row items-center bg-gray-100 rounded-lg px-3 w-full h-12 mb-4;
+}
