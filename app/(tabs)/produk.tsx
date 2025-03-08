@@ -1,6 +1,6 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import React, { useState, useEffect } from 'react'
-import { fetchProduk } from '@/lib/axios'
+import { fetchProduk, axiosInstance, createProduct } from '@/lib/axios'
 import { getInitials } from '@/utils/textUtils';
 import Header from '../components/header';
 
@@ -30,6 +30,19 @@ const produk = () => {
 
         getProducts()
     }, [])
+
+    const handleCreateProduct = async () => {
+        const newProduct = await createProduct(addProduct, addProductPrice, addTypeProduct);
+
+        if (newProduct) {
+            setProducts([...products, newProduct])
+            setAddProduct(''); // Reset form
+            setAddProductPrice('');
+            setAddTypeProduct('');
+            setModalVisible(false); // Tutup modal
+        }
+    }
+
 
     return (
         <SafeAreaView className='flex-1'>
@@ -79,7 +92,9 @@ const produk = () => {
                                 />
                             </View>
 
-                            <TouchableOpacity className='bg-blue-500 p-3 rounded-lg'>
+                            <TouchableOpacity
+                                className='bg-blue-500 p-3 rounded-lg'
+                                onPress={handleCreateProduct}>
                                 <Text className='text-white text-center font-semibold'>SUBMIT</Text>
                             </TouchableOpacity>
 
@@ -112,8 +127,10 @@ const produk = () => {
                                 <Text className='text-gray-500 text-xs'>{item.type}</Text>
                             </View>
 
-                            <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>
-                                <Text className='text-white text-sm font-semibold'>Lihat Customer</Text>
+                            <TouchableOpacity
+                                className='bg-blue-600 px-4 py-2 rounded-lg'
+                            >
+                                <Text className='text-white text-sm font-semibold'>Lihat Produk</Text>
                             </TouchableOpacity>
                         </View>
                     )}

@@ -55,3 +55,41 @@ export const fetchProduk = async () => {
         return []
     }
 }
+
+// create product
+export const createProduct = async (name:string, price:string, type:string) => {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    } else {
+        console.log('ini token login ', token)
+    }
+
+    try {
+        const response = await axiosInstance.post('/products/', {
+            name,
+            price: parseFloat(price),
+            type
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        // setProducts([...products, response.data.data])
+        // setAddProduct(''); // Reset form
+        // setAddProductPrice('');
+        // setAddTypeProduct('');
+        // setModalVisible(false); // Tutup modal
+
+        return response.data.data
+
+    } catch (error) {
+        console.error('Gagal menambahkan produk', error)
+        return []
+    }
+}
