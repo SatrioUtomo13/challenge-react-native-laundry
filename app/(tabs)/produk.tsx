@@ -1,6 +1,6 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import React, { useState, useEffect } from 'react'
-import { fetchProduk, axiosInstance, createProduct } from '@/lib/axios'
+import { fetchProduk, createProduct, deleteProduct, updateProduct } from '@/lib/axios'
 import { getInitials } from '@/utils/textUtils';
 import Header from '../components/header';
 
@@ -22,6 +22,8 @@ const produk = () => {
     const [addProductPrice, setAddProductPrice] = useState<string>('')
     const [addTypeProduct, setAddTypeProduct] = useState<string>('')
 
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
     useEffect(() => {
         const getProducts = async () => {
             const data = await fetchProduk() // Panggil fungsi fetchProduk
@@ -31,6 +33,7 @@ const produk = () => {
         getProducts()
     }, [])
 
+    // Fungsi untuk menambahkan produk
     const handleCreateProduct = async () => {
         const newProduct = await createProduct(addProduct, addProductPrice, addTypeProduct);
 
@@ -43,6 +46,73 @@ const produk = () => {
         }
     }
 
+    // Fungsi untuk menghapus produk
+    const handleDeleteProduct = async (id: string) => {
+
+        Alert.alert(
+            'konfirmasi',
+            'Apakah anda yakin ingin menghapus produk ini?',
+            [
+                {
+                    text: 'Batal',
+                    style: 'cancel'
+                },
+                {
+                    text: 'Hapus',
+                    onPress: async () => {
+                        try {
+                            await deleteProduct(id)
+                            Alert.alert('Sukses', 'Data berhasil dihapus')
+                            const data = await fetchProduk()
+                            setProducts(data)
+                        } catch (error) {
+                            Alert.alert('Error', 'Terjadi kesalahan saat menghapus data')
+                        }
+                    }
+                }
+            ]
+        )
+    }
+
+    // Fungsi untuk mengubah produk
+    const handleUpdateProduct = (id: string) => {
+
+        const productEdit = products.find((product) => product.id === id)
+
+        if (productEdit) {
+            setSelectedProduct(productEdit)
+            setAddProduct(productEdit.name)
+            setAddProductPrice(productEdit.price.toString())
+            setAddTypeProduct(productEdit.type)
+            setModalVisible(true)
+        }
+
+    }
+
+    const handleSaveProduct = async (id: string) => {
+
+        try {
+            const updatedProduct = await updateProduct(id, addProduct, parseFloat(addProductPrice), addTypeProduct)
+
+            if (updatedProduct) {
+                Alert.alert('Sukses', 'Produk berhasil diperbaharui')
+
+                // re-fetch data
+                const data = await fetchProduk()
+                setProducts(data)
+
+                // Reset state
+                setModalVisible(false);
+                setSelectedProduct(null);
+                setAddProduct('');
+                setAddProductPrice('');
+                setAddTypeProduct('');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Terjadi kesalahan saat memperbaharui produk');
+        }
+
+    }
 
     return (
         <SafeAreaView className='flex-1'>
@@ -94,8 +164,10 @@ const produk = () => {
 
                             <TouchableOpacity
                                 className='bg-blue-500 p-3 rounded-lg'
-                                onPress={handleCreateProduct}>
-                                <Text className='text-white text-center font-semibold'>SUBMIT</Text>
+                                onPress={selectedProduct ? () => handleSaveProduct(selectedProduct.id) : handleCreateProduct}>
+                                <Text className='text-white text-center font-semibold'>
+                                    {selectedProduct ? 'Update' : 'Submit'}
+                                </Text>
                             </TouchableOpacity>
 
                             <Pressable
@@ -127,11 +199,22 @@ const produk = () => {
                                 <Text className='text-gray-500 text-xs'>{item.type}</Text>
                             </View>
 
-                            <TouchableOpacity
-                                className='bg-blue-600 px-4 py-2 rounded-lg'
-                            >
-                                <Text className='text-white text-sm font-semibold'>Lihat Produk</Text>
-                            </TouchableOpacity>
+                            <View className='flex flex-row'>
+                                <TouchableOpacity
+                                    className='bg-blue-600 p-2 rounded-lg mr-2'
+                                    onPress={() => handleUpdateProduct(item.id)}
+                                >
+                                    <AntDesign name="edit" size={24} color="white" />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    className='bg-red-600 p-2 rounded-lg'
+                                    onPress={() => handleDeleteProduct(item.id)}
+                                >
+                                    <AntDesign name="delete" size={24} color="white" />
+                                </TouchableOpacity>
+
+                            </View>
                         </View>
                     )}
                 />

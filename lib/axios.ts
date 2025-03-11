@@ -63,8 +63,6 @@ export const createProduct = async (name:string, price:string, type:string) => {
     if (!token) {
         console.error("Token tidak ditemukan")
         return []
-    } else {
-        console.log('ini token login ', token)
     }
 
     try {
@@ -80,16 +78,90 @@ export const createProduct = async (name:string, price:string, type:string) => {
             }
         })
 
-        // setProducts([...products, response.data.data])
-        // setAddProduct(''); // Reset form
-        // setAddProductPrice('');
-        // setAddTypeProduct('');
-        // setModalVisible(false); // Tutup modal
-
         return response.data.data
 
     } catch (error) {
         console.error('Gagal menambahkan produk', error)
         return []
+    }
+}
+
+// update product
+export const updateProduct = async (id:string, name:string, price:number, type:string) => {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+    try {
+        const response = await axiosInstance.put('/products/', {
+            id,
+            name,
+            price,
+            type
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data
+    } catch (error) {
+        throw new Error('Gagal memperbaharui produk')
+    }
+}
+
+// export const updateProduct = async (id: string, name: string, price: number, type: string) => {
+//     const token = await AsyncStorage.getItem('token');
+
+//     if (!token) {
+//         console.error("Token tidak ditemukan")
+//         return []
+//     }
+
+//     try {
+//         const response = await axiosInstance.put(`/products/${id}`, { // Pastikan ID ada di URL
+//             name,
+//             price,
+//             type
+//         }, {
+//             headers: {
+//                 'Authorization': `Bearer ${token}`,
+//                 'Accept': 'application/json',
+//                 'Content-Type': 'application/json'
+//             }
+//         });
+
+//         return response.data;
+//     } catch (error) {
+//         throw new Error('Terjadi kesalahan saat memperbarui produk');
+//     }
+// };
+
+
+// delete product
+export const deleteProduct = async (id:string) => {
+    const token = await AsyncStorage.getItem('token');
+
+    if(!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.delete(`/products/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data
+    } catch (error) {
+        console.error('Gagal menghapus produk', error)
     }
 }
