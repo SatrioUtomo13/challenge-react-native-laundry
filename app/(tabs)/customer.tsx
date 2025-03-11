@@ -3,16 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { axiosInstance } from '../../lib/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/header';
+import { Customer } from '@/types/customerType';
+import { fetchCustomer, createCustomer, deleteCustomer, updateCustomer } from '@/lib/axios'
 import AntDesign from '@expo/vector-icons/AntDesign';
-
-interface Customer {
-    id: string;
-    name: string;
-    phoneNumber: string;
-    address: string;
-    createdAt: string;
-    updatedAt: string;
-}
 
 const customer = () => {
     const [modalVisible, setModalVisible] = useState(false);
@@ -21,35 +14,96 @@ const customer = () => {
     const [addPhoneNumber, setAddPhoneNumber] = useState<string>('');
     const [addAddress, setAddAddress] = useState<string>('');
 
-    const fetchCustomer = async () => {
-
-        const token = await AsyncStorage.getItem('token');
-
-        if (!token) {
-            console.error("Token tidak ditemukan");
-            return;
-        }
-
-        try {
-            const response = await axiosInstance.get('/customers/', {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
-            setCustomers(response.data.data);
-        } catch (error: any) {
-            console.log(error)
-        }
-    };
-
-
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
 
     useEffect(() => {
-        fetchCustomer();
+        const getCustomers = async () => {
+            const data = await fetchCustomer();
+            setCustomers(data);
+        }
+
+        getCustomers();
     }, []);
 
+
+    // Fungsi untuk menambahkan customer
+    const handleCreateCustomer = async () => {
+        const newCustomer = await createCustomer(addCustomer, addPhoneNumber, addAddress)
+
+        if (newCustomer) {
+            setCustomers([...customers, newCustomer])
+            setAddCustomer(''); // Reset form
+            setAddPhoneNumber(''); // Reset form
+            setAddAddress(''); // Reset form
+            setModalVisible(false); // Tutup modal
+        }
+
+    }
+
+    // Fungsi untuk menghapus customer
+    const handleDeleteCustomer = async (id: string) => {
+
+        Alert.alert(
+            'Konfirmasi',
+            'Apakah anda yakin ingin menghapus Customer ini?',
+            [
+                {
+                    'text': 'Batal',
+                    'style': 'cancel'
+                },
+                {
+                    'text': 'Hapus',
+                    onPress: async () => {
+                        try {
+                            await deleteCustomer(id)
+                            Alert.alert('Sukses', 'Data berhasil dihapus')
+                            const data = await fetchCustomer()
+                            setCustomers(data)
+                        } catch (error) {
+                            Alert.alert('Error', 'Terjadi kesalahan saat menghapus data')
+                        }
+                    }
+                }
+
+            ]
+        )
+    }
+
+    // Fungsi untuk mengubah customer
+    const handleUpdateCustomer = (id: string) => {
+        const customerEdit = customers.find((customer) => customer.id === id)
+
+        if (customerEdit) {
+            setSelectedCustomer(customerEdit)
+            setAddCustomer(customerEdit.name)
+            setAddPhoneNumber(customerEdit.phoneNumber)
+            setAddAddress(customerEdit.address)
+            setModalVisible(true)
+        }
+    }
+
+    const handleSaveCustomer = async (id: string) => {
+        try {
+            const updatedCustomer = await updateCustomer(id, addCustomer, addPhoneNumber, addAddress)
+
+            if (updatedCustomer) {
+                Alert.alert('Sukses', 'Customer berhasil diperbaharui')
+
+                // re-fetch data
+                const data = await fetchCustomer()
+                setCustomers(data)
+
+                // Reset state
+                setModalVisible(false);
+                setSelectedCustomer(null);
+                setAddPhoneNumber('');
+                setAddAddress('');
+                setAddCustomer('');
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Terjadi kesalahan saat memperbaharui customer');
+        }
+    }
 
     return (
         <SafeAreaView className='flex-1'>
@@ -99,8 +153,12 @@ const customer = () => {
                                 />
                             </View>
 
-                            <TouchableOpacity className='bg-blue-500 p-3 rounded-lg'>
-                                <Text className='text-white text-center font-semibold'>SUBMIT</Text>
+                            <TouchableOpacity
+                                className='bg-blue-500 p-3 rounded-lg'
+                                onPress={selectedCustomer ? () => handleSaveCustomer(selectedCustomer.id) : handleCreateCustomer}>
+                                <Text className='text-white text-center font-semibold'>
+                                    {selectedCustomer ? 'Update' : 'Submit'}
+                                </Text>
                             </TouchableOpacity>
 
                             <Pressable
@@ -132,9 +190,22 @@ const customer = () => {
                                 <Text className='text-gray-500 text-xs'>{item.address}</Text>
                             </View>
 
-                            <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>
-                                <Text className='text-white text-sm font-semibold'>Lihat Customer</Text>
-                            </TouchableOpacity>
+                            <View className='flex flex-row'>
+                                <TouchableOpacity
+                                    className='bg-blue-600 p-2 rounded-lg mr-2'
+                                    onPress={() => handleUpdateCustomer(item.id)}
+                                >
+                                    <AntDesign name="edit" size={24} color="white" />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    className='bg-red-600 p-2 rounded-lg'
+                                    onPress={() => handleDeleteCustomer(item.id)}
+                                >
+                                    <AntDesign name="delete" size={24} color="white" />
+                                </TouchableOpacity>
+
+                            </View>
                         </View>
                     )}
                 />

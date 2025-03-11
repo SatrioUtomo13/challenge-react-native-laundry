@@ -29,7 +29,7 @@ export const login = async (form: {username: string, password: string}, router: 
     }
 }
 
-
+/* === Product === */
 // fetch data product
 export const fetchProduk = async () => {
 
@@ -114,34 +114,6 @@ export const updateProduct = async (id:string, name:string, price:number, type:s
     }
 }
 
-// export const updateProduct = async (id: string, name: string, price: number, type: string) => {
-//     const token = await AsyncStorage.getItem('token');
-
-//     if (!token) {
-//         console.error("Token tidak ditemukan")
-//         return []
-//     }
-
-//     try {
-//         const response = await axiosInstance.put(`/products/${id}`, { // Pastikan ID ada di URL
-//             name,
-//             price,
-//             type
-//         }, {
-//             headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Accept': 'application/json',
-//                 'Content-Type': 'application/json'
-//             }
-//         });
-
-//         return response.data;
-//     } catch (error) {
-//         throw new Error('Terjadi kesalahan saat memperbarui produk');
-//     }
-// };
-
-
 // delete product
 export const deleteProduct = async (id:string) => {
     const token = await AsyncStorage.getItem('token');
@@ -163,5 +135,113 @@ export const deleteProduct = async (id:string) => {
         return response.data
     } catch (error) {
         console.error('Gagal menghapus produk', error)
+    }
+}
+
+/* === Customer === */
+
+// fetch data customer
+export const fetchCustomer = async () => {
+
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+        console.error("Token tidak ditemukan");
+        return;
+    }
+
+    try {
+        const response = await axiosInstance.get('/customers/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        return response.data.data
+    } catch (error: any) {
+        console.log(error)
+    }
+};
+
+// create customer
+export const createCustomer = async (name:string, phoneNumber:string, address:string) => {
+    const token = await AsyncStorage.getItem('token')
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.post('/customers/', {
+            name,
+            phoneNumber,
+            address
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data.data
+    } catch (error) {
+        console.error('Gagal menambahkan customer', error)   
+        return []     
+    }
+}
+
+// delete customer
+export const deleteCustomer = async (id:string) => {
+    const token = await AsyncStorage.getItem('token');
+
+    if(!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.delete(`/customers/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data
+    } catch (error) {
+        console.error('Gagal menghapus customer', error)
+    }
+}
+
+// update customer
+export const updateCustomer = async (id: string, name: string, phoneNumber: string, address: string) => {
+    const token = await AsyncStorage.getItem('token');
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.put('/customers/', {
+            id,
+            name,
+            phoneNumber,
+            address
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data
+    } catch (error) {
+        throw new Error('Gagal memperbaharui customer')
     }
 }
