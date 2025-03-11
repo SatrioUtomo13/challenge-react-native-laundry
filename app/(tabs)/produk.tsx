@@ -2,18 +2,10 @@ import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextIn
 import React, { useState, useEffect } from 'react'
 import { fetchProduk, createProduct, deleteProduct, updateProduct } from '@/lib/axios'
 import { getInitials } from '@/utils/textUtils';
+import { Product } from '@/types/productType';
 import Header from '../components/header';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
-
-interface Product {
-    id: string,
-    name: string,
-    price: number,
-    type: string,
-    createdAt: string,
-    updatedAt: string
-}
 
 const produk = () => {
     const [products, setProducts] = useState<Product[]>([])
