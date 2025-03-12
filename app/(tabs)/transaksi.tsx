@@ -1,7 +1,8 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import { SelectList } from "react-native-dropdown-select-list";
-import React, { useState } from 'react'
-import { axiosInstance } from '@/lib/axios';
+import React, { useEffect, useState } from 'react'
+import { axiosInstance, fetchTransaction } from '@/lib/axios';
+import { Transaction } from '@/types/transactionType';
 import ListData from '../components/listData';
 import Header from '../components/header';
 
@@ -28,32 +29,26 @@ const packages = [
 ];
 
 const transaksi = () => {
+    const [transactions, setTransactions] = useState<Transaction[]>([])
     const [modalVisible, setModalVisible] = useState(false);
     const [customer, setCustomer] = useState("");
     const [packageType, SetPackageType] = useState("")
     const [quantity, setQuantity] = useState(0);
     const [price, setPrice] = useState(0);
 
-    // const fetchTransaksi = async () => {
+    useEffect(() => {
+        const getTransactions = async () => {
+            const data = await fetchTransaction()
+            setTransactions(data)
+        }
 
-    //     const token = AsyncStorage.getItem('token');
-
-    //     if (!token) {
-    //         console.error("Token tidak ditemukan")
-    //         return
-    //     }
-
-    //     try {
-    //         const response = await axiosInstance.get()
-    //     } catch (error) {
-
-    //     }
-    // }
+        getTransactions()
+    })
 
     return (
         <SafeAreaView className='flex-1'>
             <View className='flex-1 bg-gray-100 p-4'>
-                {/* Modal */}
+
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -63,7 +58,7 @@ const transaksi = () => {
                         setModalVisible(!modalVisible);
                     }}>
                     <View className='flex-1 bg-black/50 justify-end'>
-                        {/* Modal Content */}
+
                         <View className='bg-white w-full h-[80%] rounded-t-3xl p-5'>
                             <Text className='text-lg font-semibold mb-2'>Tambah Transaksi Baru</Text>
 
@@ -125,17 +120,18 @@ const transaksi = () => {
                 {/* <ListData customers={customers} /> */}
 
                 <FlatList
-                    data={customers}
+                    data={transactions}
+                    keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
-                            <View className={`w-12 h-12 rounded-full flex items-center ${item.color} justify-center mr-3`}>
-                                <Text>{item.initials}</Text>
+                            <View className={`w-12 h-12 rounded-full flex items-center bg-green-500 justify-center mr-3`}>
+                                <Text>{item.customer.name.slice(0, 2).toUpperCase()}</Text>
                             </View>
 
                             <View className='flex-1'>
-                                <Text className='font-semibold text-gray-900'>{item.name}</Text>
-                                <Text className='text-gray-600 text-sm'>{item.phone}</Text>
-                                <Text className='text-gray-500 text-xs'>{item.transactions} Transaksi</Text>
+                                <Text className='font-semibold text-gray-900'>{item.customer.name}</Text>
+                                <Text className='text-gray-600 text-sm'>{item.customer.phoneNumber}</Text>
+                                <Text className='text-gray-500 text-xs'>{item.billDetails.length} Transaksi</Text>
                             </View>
 
                             <TouchableOpacity className='bg-blue-600 px-4 py-2 rounded-lg'>

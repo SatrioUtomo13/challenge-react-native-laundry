@@ -245,3 +245,30 @@ export const updateCustomer = async (id: string, name: string, phoneNumber: stri
         throw new Error('Gagal memperbaharui customer')
     }
 }
+
+/* === Transaction === */
+
+// fetch data transaction
+export const fetchTransaction = async () => {
+    const token = await AsyncStorage.getItem('token')
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.get('/bills/', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data.data
+    } catch (error: any) {
+        console.log('Gagal mengambil transaksi', error)
+        return []
+    }
+}
