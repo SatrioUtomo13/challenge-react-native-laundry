@@ -1,27 +1,31 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import React, { useEffect, useState } from 'react'
-import { axiosInstance } from '../../lib/axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from '../components/header';
 import { Customer } from '@/types/customerType';
 import { fetchCustomer, createCustomer, deleteCustomer, updateCustomer } from '@/lib/axios'
+import { useDispatch, useSelector } from 'react-redux';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const customer = () => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [customers, setCustomers] = useState<Customer[]>([])
     const [addCustomer, setAddCustomer] = useState<string>('');
     const [addPhoneNumber, setAddPhoneNumber] = useState<string>('');
     const [addAddress, setAddAddress] = useState<string>('');
-
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
 
-    useEffect(() => {
-        const getCustomers = async () => {
-            const data = await fetchCustomer();
-            setCustomers(data);
-        }
+    const customerSelector = useSelector((state: any) => state.customer)
+    const dispatch = useDispatch()
 
+    const getCustomers = async () => {
+        const data = await fetchCustomer();
+
+        dispatch({
+            type: "FETCH_CUSTOMERS",
+            payload: data
+        })
+    }
+
+    useEffect(() => {
         getCustomers();
     }, []);
 
@@ -31,11 +35,18 @@ const customer = () => {
         const newCustomer = await createCustomer(addCustomer, addPhoneNumber, addAddress)
 
         if (newCustomer) {
-            setCustomers([...customers, newCustomer])
-            setAddCustomer(''); // Reset form
-            setAddPhoneNumber(''); // Reset form
-            setAddAddress(''); // Reset form
-            setModalVisible(false); // Tutup modal
+            dispatch({
+                type: "CREATE_CUSTOMER",
+                payload: newCustomer
+            })
+
+            // Reset state & close modal
+            setAddCustomer('')
+            setAddPhoneNumber('')
+            setAddAddress('')
+            setModalVisible(false)
+
+            Alert.alert("Sukses", "Customer berhasil ditambahkan")
         }
 
     }
@@ -56,9 +67,14 @@ const customer = () => {
                     onPress: async () => {
                         try {
                             await deleteCustomer(id)
+
+                            // dispatch to Redux
+                            dispatch({
+                                type: "DELETE_CUSTOMER",
+                                payload: id
+                            })
+
                             Alert.alert('Sukses', 'Data berhasil dihapus')
-                            const data = await fetchCustomer()
-                            setCustomers(data)
                         } catch (error) {
                             Alert.alert('Error', 'Terjadi kesalahan saat menghapus data')
                         }
@@ -71,7 +87,9 @@ const customer = () => {
 
     // Fungsi untuk mengubah customer
     const handleUpdateCustomer = (id: string) => {
-        const customerEdit = customers.find((customer) => customer.id === id)
+
+        // Find customer by id
+        const customerEdit = customerSelector.customers.find((customer: any) => customer.id === id)
 
         if (customerEdit) {
             setSelectedCustomer(customerEdit)
@@ -87,11 +105,17 @@ const customer = () => {
             const updatedCustomer = await updateCustomer(id, addCustomer, addPhoneNumber, addAddress)
 
             if (updatedCustomer) {
+
+                // dispatch to Redux
+                dispatch({
+                    type: "UPDATE_CUSTOMER",
+                    payload: updatedCustomer
+                })
+
                 Alert.alert('Sukses', 'Customer berhasil diperbaharui')
 
                 // re-fetch data
-                const data = await fetchCustomer()
-                setCustomers(data)
+                getCustomers()
 
                 // Reset state
                 setModalVisible(false);
@@ -176,8 +200,10 @@ const customer = () => {
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
 
+                <Text>{customerSelector.message}</Text>
+
                 <FlatList
-                    data={customers}
+                    data={customerSelector.customers}
                     renderItem={({ item }) => (
                         <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
                             <View className={`w-12 h-12 rounded-full flex items-center bg-green-300 justify-center mr-3`}>
