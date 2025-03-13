@@ -1,6 +1,11 @@
 const INITIAL_STATE = {
     customers : [],
-    message : "halo dunia"
+    form: {
+        name: '',
+        phoneNumber: '',
+        address: ''
+    },
+    selectedCustomer: null
 }
 
 export const customerReducer = (state = INITIAL_STATE, action: any) => {
@@ -17,6 +22,12 @@ export const customerReducer = (state = INITIAL_STATE, action: any) => {
 
         case "UPDATE_CUSTOMER":
             return {...state, customers: state.customers.map((customer:any) => customer.id === action.payload.id ? action.payload : customer)}
+
+        case "SET_FORM":
+            return {...state, form: {...state.form, [action.field]: action.value}}
+
+        case "SET_SELECTED_CUSTOMER":
+            return {...state, selectedCustomer: action.payload}
         
         default:
             return state

@@ -1,19 +1,14 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import React, { useEffect, useState } from 'react'
 import Header from '../components/header';
-import { Customer } from '@/types/customerType';
 import { fetchCustomer, createCustomer, deleteCustomer, updateCustomer } from '@/lib/axios'
 import { useDispatch, useSelector } from 'react-redux';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const customer = () => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [addCustomer, setAddCustomer] = useState<string>('');
-    const [addPhoneNumber, setAddPhoneNumber] = useState<string>('');
-    const [addAddress, setAddAddress] = useState<string>('');
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+    const { customers, form, selectedCustomer } = useSelector((state: any) => state.customer)
 
-    const customerSelector = useSelector((state: any) => state.customer)
     const dispatch = useDispatch()
 
     const getCustomers = async () => {
@@ -32,7 +27,7 @@ const customer = () => {
 
     // Fungsi untuk menambahkan customer
     const handleCreateCustomer = async () => {
-        const newCustomer = await createCustomer(addCustomer, addPhoneNumber, addAddress)
+        const newCustomer = await createCustomer(form.name, form.phoneNumber, form.address);
 
         if (newCustomer) {
             dispatch({
@@ -40,10 +35,14 @@ const customer = () => {
                 payload: newCustomer
             })
 
-            // Reset state & close modal
-            setAddCustomer('')
-            setAddPhoneNumber('')
-            setAddAddress('')
+            // Reset form setelah menambahkan customer
+            dispatch({ type: "SET_FORM", field: "name", value: "" })
+            dispatch({ type: "SET_FORM", field: "phoneNumber", value: "" })
+            dispatch({ type: "SET_FORM", field: "address", value: "" })
+
+            // Reset selected customer
+            dispatch({ type: "SET_SELECTED_CUSTOMER", payload: null })
+
             setModalVisible(false)
 
             Alert.alert("Sukses", "Customer berhasil ditambahkan")
@@ -85,48 +84,52 @@ const customer = () => {
         )
     }
 
-    // Fungsi untuk mengubah customer
+    // Fungsi untuk mengubah nilai form
+    const handleChange = (field: string, value: string) => {
+        dispatch({ type: "SET_FORM", field, value })
+    }
+
+    // Fungsi untuk bulk modal customer
     const handleUpdateCustomer = (id: string) => {
 
         // Find customer by id
-        const customerEdit = customerSelector.customers.find((customer: any) => customer.id === id)
+        const customerEdit = customers.find((customer: any) => customer.id === id)
 
         if (customerEdit) {
-            setSelectedCustomer(customerEdit)
-            setAddCustomer(customerEdit.name)
-            setAddPhoneNumber(customerEdit.phoneNumber)
-            setAddAddress(customerEdit.address)
+            dispatch({ type: 'SET_SELECTED_CUSTOMER', payload: customerEdit })
+            dispatch({ type: "SET_FORM", field: "name", value: customerEdit.name })
+            dispatch({ type: "SET_FORM", field: "phoneNumber", value: customerEdit.phoneNumber })
+            dispatch({ type: "SET_FORM", field: "address", value: customerEdit.address })
+
             setModalVisible(true)
         }
     }
 
+    // Fungsi untuk menyimpan perubahan customer
     const handleSaveCustomer = async (id: string) => {
-        try {
-            const updatedCustomer = await updateCustomer(id, addCustomer, addPhoneNumber, addAddress)
+        const updatedCustomer = await updateCustomer(id, form.name, form.phoneNumber, form.address)
 
-            if (updatedCustomer) {
+        if (updatedCustomer) {
+            dispatch({
+                type: "UPDATE_CUSTOMER",
+                payload: updatedCustomer
+            })
 
-                // dispatch to Redux
-                dispatch({
-                    type: "UPDATE_CUSTOMER",
-                    payload: updatedCustomer
-                })
+            getCustomers()
 
-                Alert.alert('Sukses', 'Customer berhasil diperbaharui')
+            // Reset form setelah update
+            dispatch({ type: "SET_FORM", field: "name", value: "" })
+            dispatch({ type: "SET_FORM", field: "phoneNumber", value: "" })
+            dispatch({ type: "SET_FORM", field: "address", value: "" })
 
-                // re-fetch data
-                getCustomers()
+            // Reset selected customer
+            dispatch({ type: "SET_SELECTED_CUSTOMER", payload: null })
 
-                // Reset state
-                setModalVisible(false);
-                setSelectedCustomer(null);
-                setAddPhoneNumber('');
-                setAddAddress('');
-                setAddCustomer('');
-            }
-        } catch (error) {
-            Alert.alert('Error', 'Terjadi kesalahan saat memperbaharui customer');
+            Alert.alert('Sukses', 'Customer berhasil diperbaharui')
+
+            setModalVisible(false)
         }
+
     }
 
     return (
@@ -150,8 +153,8 @@ const customer = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Nama Customer'
                                     keyboardType='default'
-                                    value={addCustomer}
-                                    onChangeText={(text) => setAddCustomer(text)}
+                                    value={form.name}
+                                    onChangeText={(text) => handleChange('name', text)}
                                 />
                             </View>
 
@@ -161,8 +164,8 @@ const customer = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Nomor HP Customer'
                                     keyboardType='default'
-                                    value={addPhoneNumber}
-                                    onChangeText={(text) => setAddPhoneNumber(text)}
+                                    value={form.phoneNumber}
+                                    onChangeText={(text) => handleChange('phoneNumber', text)}
                                 />
                             </View>
 
@@ -172,8 +175,8 @@ const customer = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Alamat Customer'
                                     keyboardType='default'
-                                    value={addAddress}
-                                    onChangeText={(text) => setAddAddress(text)}
+                                    value={form.address}
+                                    onChangeText={(text) => handleChange('address', text)}
                                 />
                             </View>
 
@@ -200,10 +203,8 @@ const customer = () => {
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
 
-                <Text>{customerSelector.message}</Text>
-
                 <FlatList
-                    data={customerSelector.customers}
+                    data={customers}
                     renderItem={({ item }) => (
                         <View className='bg-white p-4 mb-3 rounded-xl shadow flex-row items-center'>
                             <View className={`w-12 h-12 rounded-full flex items-center bg-green-300 justify-center mr-3`}>
