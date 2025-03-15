@@ -89,7 +89,7 @@ const customer = () => {
         dispatch({ type: "SET_FORM", field, value })
     }
 
-    // Fungsi untuk bulk modal customer
+    // Fungsi untuk mengubah customer
     const handleUpdateCustomer = (id: string) => {
 
         // Find customer by id

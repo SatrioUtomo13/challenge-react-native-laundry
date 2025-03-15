@@ -11,7 +11,7 @@ const INITIAL_STATE = {
 export const customerReducer = (state = INITIAL_STATE, action: any) => {
 
     switch (action.type) {
-        case 'FETCH_CUSTOMERS':
+        case "FETCH_CUSTOMERS":
             return {...state, customers: action.payload}
 
         case "CREATE_CUSTOMER":

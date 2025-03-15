@@ -2,39 +2,47 @@ import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextIn
 import React, { useState, useEffect } from 'react'
 import { fetchProduk, createProduct, deleteProduct, updateProduct } from '@/lib/axios'
 import { getInitials } from '@/utils/textUtils';
-import { Product } from '@/types/productType';
+import { useDispatch, useSelector } from 'react-redux';
 import Header from '../components/header';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 
 const produk = () => {
-    const [products, setProducts] = useState<Product[]>([])
     const [modalVisible, setModalVisible] = useState(false)
-    const [addProduct, setAddProduct] = useState<string>('')
-    const [addProductPrice, setAddProductPrice] = useState<string>('')
-    const [addTypeProduct, setAddTypeProduct] = useState<string>('')
+    const { products, form, selectedProduct } = useSelector((state: any) => state.product)
 
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+    const dispatch = useDispatch()
+
+    const getProducts = async () => {
+        const data = await fetchProduk() // Panggil fungsi fetchProduk
+        dispatch({
+            type: "FETCH_PRODUCTS",
+            payload: data
+        })
+    }
 
     useEffect(() => {
-        const getProducts = async () => {
-            const data = await fetchProduk() // Panggil fungsi fetchProduk
-            setProducts(data)
-        }
-
         getProducts()
     }, [])
 
     // Fungsi untuk menambahkan produk
     const handleCreateProduct = async () => {
-        const newProduct = await createProduct(addProduct, addProductPrice, addTypeProduct);
+        const newProduct = await createProduct(form.name, form.price, form.type);
 
         if (newProduct) {
-            setProducts([...products, newProduct])
-            setAddProduct(''); // Reset form
-            setAddProductPrice('');
-            setAddTypeProduct('');
+            dispatch({
+                type: "CREATE_PRODUCT",
+                payload: newProduct
+            })
+
+            // Reset form setelah menambahkan produk
+            dispatch({ type: "SET_FORM", field: "name", value: "" })
+            dispatch({ type: "SET_FORM", field: "price", value: "" })
+            dispatch({ type: "SET_FORM", field: "type", value: "" })
+
             setModalVisible(false); // Tutup modal
+
+            Alert.alert("Sukses", "Produk berhasil ditambahkan")
         }
     }
 
@@ -54,9 +62,14 @@ const produk = () => {
                     onPress: async () => {
                         try {
                             await deleteProduct(id)
+
+                            // dispatch to Redux
+                            dispatch({
+                                type: "DELETE_PRODUCT",
+                                payload: id
+                            })
+
                             Alert.alert('Sukses', 'Data berhasil dihapus')
-                            const data = await fetchProduk()
-                            setProducts(data)
                         } catch (error) {
                             Alert.alert('Error', 'Terjadi kesalahan saat menghapus data')
                         }
@@ -66,42 +79,50 @@ const produk = () => {
         )
     }
 
+    // Fungsi untuk mengubah nilai form
+    const handleChange = (field: string, value: string) => {
+        dispatch({ type: "SET_FORM", field, value })
+    }
+
     // Fungsi untuk mengubah produk
     const handleUpdateProduct = (id: string) => {
 
-        const productEdit = products.find((product) => product.id === id)
+        const productEdit = products.find((product: any) => product.id === id)
 
         if (productEdit) {
-            setSelectedProduct(productEdit)
-            setAddProduct(productEdit.name)
-            setAddProductPrice(productEdit.price.toString())
-            setAddTypeProduct(productEdit.type)
+            dispatch({ type: 'SET_SELECTED_PRODUCT', payload: productEdit })
+            dispatch({ type: "SET_FORM", field: "name", value: productEdit.name })
+            dispatch({ type: "SET_FORM", field: "price", value: productEdit.price.toString() })
+            dispatch({ type: "SET_FORM", field: "type", value: productEdit.type })
+
             setModalVisible(true)
         }
 
     }
 
+    // Fungsi untuk menyimpan perubahan produk
     const handleSaveProduct = async (id: string) => {
 
-        try {
-            const updatedProduct = await updateProduct(id, addProduct, parseFloat(addProductPrice), addTypeProduct)
+        const updatedProduct = await updateProduct(id, form.name, parseFloat(form.price), form.type)
 
-            if (updatedProduct) {
-                Alert.alert('Sukses', 'Produk berhasil diperbaharui')
+        if (updatedProduct) {
+            dispatch({
+                type: "UPDATE_PRODUCT",
+                payload: updatedProduct
+            })
+            Alert.alert('Sukses', 'Produk berhasil diperbaharui')
 
-                // re-fetch data
-                const data = await fetchProduk()
-                setProducts(data)
+            getProducts()
 
-                // Reset state
-                setModalVisible(false);
-                setSelectedProduct(null);
-                setAddProduct('');
-                setAddProductPrice('');
-                setAddTypeProduct('');
-            }
-        } catch (error) {
-            Alert.alert('Error', 'Terjadi kesalahan saat memperbaharui produk');
+            // Reset form setelah update
+            dispatch({ type: "SET_FORM", field: "name", value: "" })
+            dispatch({ type: "SET_FORM", field: "price", value: "" })
+            dispatch({ type: "SET_FORM", field: "type", value: "" })
+
+            // Reset selected product
+            dispatch({ type: "SET_SELECTED_PRODUCT", payload: null })
+
+            setModalVisible(false);
         }
 
     }
@@ -127,8 +148,8 @@ const produk = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Nama Produk'
                                     keyboardType='default'
-                                    value={addProduct}
-                                    onChangeText={(text) => setAddProduct(text)}
+                                    value={form.name}
+                                    onChangeText={(text) => handleChange('name', text)}
                                 />
                             </View>
 
@@ -138,8 +159,8 @@ const produk = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Harga Produk'
                                     keyboardType='default'
-                                    value={addProductPrice}
-                                    onChangeText={(text) => setAddProductPrice(text)}
+                                    value={form.price}
+                                    onChangeText={(text) => handleChange('price', text)}
                                 />
                             </View>
 
@@ -149,8 +170,8 @@ const produk = () => {
                                     className='border rounded-lg p-2 bg-white'
                                     placeholder='Masukkan Type Produk'
                                     keyboardType='default'
-                                    value={addTypeProduct}
-                                    onChangeText={(text) => setAddTypeProduct(text)}
+                                    value={form.type}
+                                    onChangeText={(text) => handleChange('type', text)}
                                 />
                             </View>
 
