@@ -272,3 +272,38 @@ export const fetchTransaction = async () => {
         return []
     }
 }
+
+// create transaction
+export const createTransaction = async (customerId: string, productId: string, qty: number) => {
+    const token = await AsyncStorage.getItem('token')
+
+    if (!token) {
+        console.error("Token tidak ditemukan")
+        return []
+    }
+
+    try {
+        const response = await axiosInstance.post('/bills/', {
+            customerId,
+            billDetails: [ 
+                {
+                    product: {
+                        id: productId
+                    },
+                    qty
+                }
+            ]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+
+        return response.data.data
+    } catch (error) {
+        console.error('Gagal menambahkan transaksi', error)
+        return []
+    }
+}
