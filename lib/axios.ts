@@ -2,29 +2,63 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const axiosInstance = axios.create({
-    baseURL: "http://192.168.1.2:8888/api/v1"
+    baseURL: "http://192.168.119.217:8888/api/v1"
 }) 
 
-// login 
-export const login = async (form: {username: string, password: string}, router: any) => {
+/* === Auth === */
+// Login
+export const login = async (username: string, password: string) => {
 
-    if (!form.username || !form.password) {
+    if (!username || !password) {
         alert('Email dan password harus diisi');
         return
     }
 
     try {
-        const response = await axiosInstance.post('/auth/login', form)
+        const response = await axiosInstance.post('/auth/login', {
+            username,
+            password
+        })
 
         if (response.status == 201) {
             const token = response.data.data.token
             await AsyncStorage.setItem('token', token)
-            router.push('/customer');
         } else {
             alert('Login gagal')
         }
+
+        return response.data.data
+
     } catch (error) {
         console.error('Login error :', error)
+        alert('Terjadi Kesalahan')
+    }
+}
+
+// Register
+export const register = async (name: string, email: string, username: string, password: string, role: string) => {
+
+    if (!name || !email || !username || !password || !role) {
+        alert('Semua field harus diisi');
+        return
+    }
+
+    try {
+        const response = await axiosInstance.post('/auth/register', {
+            name,
+            email,
+            username,
+            password,
+            role
+        })
+
+        if (response.status == 201) {
+            return response.data.data
+        } else {
+            alert('Register gagal')
+        }
+    } catch (error) {
+        console.error('Registrasi error :', error)
         alert('Terjadi Kesalahan')
     }
 }

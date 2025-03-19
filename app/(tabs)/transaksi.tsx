@@ -1,7 +1,7 @@
 import { View, Text, FlatList, TouchableOpacity, Modal, Alert, Pressable, TextInput, SafeAreaView } from 'react-native';
 import { SelectList } from "react-native-dropdown-select-list";
 import React, { useEffect, useState } from 'react'
-import { axiosInstance, fetchTransaction, createTransaction, fetchCustomer, fetchProduk } from '@/lib/axios';
+import { fetchTransaction, createTransaction, fetchCustomer, fetchProduk } from '@/lib/axios';
 import { useDispatch, useSelector } from 'react-redux';
 import Header from '../components/header';
 
@@ -9,8 +9,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 const transaksi = () => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [price, setPrice] = useState(0);
-
     const { transactions, form } = useSelector((state: any) => state.transaction)
     const { customers } = useSelector((state: any) => state.customer)
     const { products } = useSelector((state: any) => state.product)
@@ -157,8 +155,6 @@ const transaksi = () => {
                     setModalVisible={setModalVisible}
                     icon={<AntDesign name="pluscircle" size={45} color="blue" />}
                 />
-
-                {/* <ListData customers={customers} /> */}
 
                 <FlatList
                     data={transactions}
