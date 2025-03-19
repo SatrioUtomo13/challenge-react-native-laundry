@@ -60,6 +60,7 @@ const LoginScreen = () => {
                 <TextInput
                     placeholder="Password"
                     className='flex-1 text-base ml-2'
+                    secureTextEntry={true}
                     onChangeText={(text) => handleChange('password', text)}
                     value={loginForm.password}
                 />

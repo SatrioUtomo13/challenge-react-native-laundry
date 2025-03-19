@@ -1,5 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native'
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import { register } from '@/lib/axios'
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -81,6 +81,7 @@ const SignUpScreen = () => {
                 <TextInput
                     placeholder="Password"
                     className='flex-1 text-base ml-2'
+                    secureTextEntry={true}
                     onChangeText={(text) => handleChange('password', text)}
                     value={registerForm.password}
                 />
@@ -101,10 +102,10 @@ const SignUpScreen = () => {
                 className='text-lg font-bold bg-blue-500 py-3 w-full rounded-lg items-center mb-4'
                 onPress={() => handleRegister()}
             >
-                <Text className='text-lg font-bold text-white'>Masuk</Text>
+                <Text className='text-lg font-bold text-white'>Daftar</Text>
             </TouchableOpacity>
 
-            <Text className='text-sm text-gray-600'>Baru di Enigma? <Text className='text-blue-500 font-bold'>Buat Akun</Text></Text>
+            <Text className='text-sm text-gray-600'>Sudah punya akun? <Text className='text-blue-500 font-bold'><Link href="/login">Masuk</Link></Text></Text>
         </View>
     )
 }
