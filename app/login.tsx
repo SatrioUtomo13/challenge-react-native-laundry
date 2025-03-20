@@ -6,13 +6,19 @@ import { Link } from "expo-router";
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useState } from 'react';
 
 
 const LoginScreen = () => {
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
     const router = useRouter();
     const { loginForm } = useSelector((state: any) => state.auth)
 
     const dispatch = useDispatch()
+
+    const handleSecureTextEntry = () => {
+        setSecureTextEntry(!secureTextEntry)
+    }
 
     const handleChange = (field: string, value: string) => {
         dispatch({ type: "SET_LOGIN_FORM", field, value })
@@ -49,6 +55,8 @@ const LoginScreen = () => {
                 <MaterialIcons name="email" size={24} color="black" />
                 <TextInput
                     placeholder="Email"
+                    placeholderTextColor="gray"
+                    autoCapitalize="none"
                     className='flex-1 text-base ml-2'
                     onChangeText={(text) => handleChange('username', text)}
                     value={loginForm.username}
@@ -59,12 +67,13 @@ const LoginScreen = () => {
                 <AntDesign name="lock" size={24} color="black" />
                 <TextInput
                     placeholder="Password"
+                    placeholderTextColor="gray"
                     className='flex-1 text-base ml-2'
-                    secureTextEntry={true}
+                    secureTextEntry={secureTextEntry}
                     onChangeText={(text) => handleChange('password', text)}
                     value={loginForm.password}
                 />
-                <AntDesign name="eyeo" size={24} color="black" />
+                <AntDesign name="eyeo" size={24} color="black" onPress={() => handleSecureTextEntry()} />
             </View>
 
             <TouchableOpacity

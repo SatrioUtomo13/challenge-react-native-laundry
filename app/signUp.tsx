@@ -1,4 +1,5 @@
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native'
+import React, { useState } from 'react'
 import { useRouter, Link } from 'expo-router';
 import { register } from '@/lib/axios'
 import { useDispatch, useSelector } from 'react-redux';
@@ -8,10 +9,15 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 
 const SignUpScreen = () => {
+    const [secureTextEntry, setSecureTextEntry] = useState(true);
     const router = useRouter();
     const { registerForm } = useSelector((state: any) => state.auth)
 
     const dispatch = useDispatch()
+
+    const handleSecureTextEntry = () => {
+        setSecureTextEntry(!secureTextEntry)
+    }
 
     const handleChange = (field: string, value: string) => {
         dispatch({ type: "SET_REGISTER_FORM", field, value })
@@ -50,6 +56,8 @@ const SignUpScreen = () => {
                 <MaterialIcons name="person" size={24} color="black" />
                 <TextInput
                     placeholder="Name"
+                    placeholderTextColor="gray"
+                    autoCapitalize="none"
                     className='flex-1 text-base ml-2'
                     onChangeText={(text) => handleChange('name', text)}
                     value={registerForm.name}
@@ -60,6 +68,8 @@ const SignUpScreen = () => {
                 <MaterialIcons name="email" size={24} color="black" />
                 <TextInput
                     placeholder="Email"
+                    placeholderTextColor="gray"
+                    autoCapitalize="none"
                     className='flex-1 text-base ml-2'
                     onChangeText={(text) => handleChange('email', text)}
                     value={registerForm.email}
@@ -70,6 +80,8 @@ const SignUpScreen = () => {
                 <MaterialIcons name="supervised-user-circle" size={24} color="black" />
                 <TextInput
                     placeholder="Username"
+                    placeholderTextColor="gray"
+                    autoCapitalize="none"
                     className='flex-1 text-base ml-2'
                     onChangeText={(text) => handleChange('username', text)}
                     value={registerForm.username}
@@ -80,18 +92,21 @@ const SignUpScreen = () => {
                 <AntDesign name="lock" size={24} color="black" />
                 <TextInput
                     placeholder="Password"
+                    placeholderTextColor="gray"
                     className='flex-1 text-base ml-2'
-                    secureTextEntry={true}
+                    secureTextEntry={secureTextEntry}
                     onChangeText={(text) => handleChange('password', text)}
                     value={registerForm.password}
                 />
-                <AntDesign name="eyeo" size={24} color="black" />
+                <AntDesign name="eyeo" size={24} color="black" onPress={() => handleSecureTextEntry()} />
             </View>
 
             <View className='input-login'>
                 <MaterialIcons name="tag" size={24} color="black" />
                 <TextInput
                     placeholder="Role"
+                    placeholderTextColor="gray"
+                    autoCapitalize="none"
                     className='flex-1 text-base ml-2'
                     onChangeText={(text) => handleChange('role', text)}
                     value={registerForm.role}
